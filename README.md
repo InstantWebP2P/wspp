@@ -1,1 +1,1 @@
-Fork of `ws` for better streaming
+Fork of `streamws` for p2p streaming over udp
