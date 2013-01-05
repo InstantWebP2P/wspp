@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 Fork of `streamws` for p2p streaming over udp
-=======
 [![Build Status](https://secure.travis-ci.org/einaros/ws.png)](http://travis-ci.org/einaros/ws)
 
 # ws: a node.js websocket library #
@@ -160,4 +158,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
->>>>>>> 8c5ab0b6bc06d8f9a61626e0da91e67c7d37ef2c
