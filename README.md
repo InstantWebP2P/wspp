@@ -1,4 +1,4 @@
-Fork of `streamws` for p2p streaming over udp
+Fork of `ws` for p2p streaming over udp
 [![Build Status](https://secure.travis-ci.org/einaros/ws.png)](http://travis-ci.org/einaros/ws)
 
 # ws: a node.js websocket library #
