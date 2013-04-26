@@ -2,7 +2,7 @@
   "author": "Tom Zhou",
   "name": "wspp",
   "description": "Lightly modified version of einaros/ws to support p2p streaming for node.js",
-  "version": "0.1.1",
+  "version": "0.4.26",
   "repository": {
     "type": "git",
     "url": "git://github.com/InstantWebP2P/wspp.git"
@@ -17,7 +17,7 @@
   "dependencies": {
     "commander": "~0.6.1",
     "tinycolor": "0.x",
-    "options": "latest"
+    "options": ">=0.0.5"
   },
   "devDependencies": {
     "mocha": "~1.2.1",
