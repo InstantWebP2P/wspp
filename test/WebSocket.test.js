@@ -13,11 +13,13 @@ var port = 20000;
 function getArrayBuffer(buf) {
   var l = buf.length;
   var arrayBuf = new ArrayBuffer(l);
-  for (var i = 0; i < l; ++i) {
-    arrayBuf[i] = buf[i];
+  var uint8View = new Uint8Array(arrayBuf);
+  for (var i = 0; i < l; i++) {
+    uint8View[i] = buf[i];
   }
-  return arrayBuf;
+  return uint8View.buffer;
 }
+
 
 function areArraysEqual(x, y) {
   if (x.length != y.length) return false;
@@ -36,6 +38,20 @@ describe('WebSocket', function() {
       catch (e) {
         done();
       }
+    });
+  });
+
+  describe('options', function() {
+    it('should accept an `agent` option', function(done) {
+      var wss = new WebSocketServer({port: ++port}, function() {
+        var agent = {
+          addRequest: function() {
+            wss.close();
+            done();
+          }
+        };
+        var ws = new WebSocket('ws://localhost:' + port, { agent: agent });
+      });
     });
   });
 
@@ -1517,7 +1533,7 @@ describe('WebSocket', function() {
       });
       var wss = new WebSocketServer({server: app});
       app.listen(++port, function() {
-        var ws = new WebSocket('ws://localhost:' + port);
+        var ws = new WebSocket('ws://localhost:' + port, { rejectUnauthorized :false });
         ws.on('error', function() {
           app.close();
           ws.terminate();
@@ -1628,4 +1644,32 @@ describe('WebSocket', function() {
       });
     });
   });
+
+  describe('host and origin headers', function() {
+
+	it('includes the host header with port number', function(done) {
+		var srv = http.createServer();
+		srv.listen(++port, function(){
+			srv.on('upgrade', function(req, socket, upgradeHeade) {
+				assert.equal('localhost:' + port, req.headers['host']);
+				srv.close();
+				done();
+			});
+			var ws = new WebSocket('ws://localhost:' + port);
+		});
+	});
+
+	it('includes the origin header with port number', function(done) {
+		var srv = http.createServer();
+		srv.listen(++port, function() { 
+			srv.on('upgrade', function(req, socket, upgradeHeade) {
+				assert.equal('localhost:' + port, req.headers['origin']);
+				srv.close();
+				done();
+			});
+			var ws = new WebSocket('ws://localhost:' + port);
+		});
+	});
+  });
+
 });

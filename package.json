@@ -2,7 +2,7 @@
   "author": "Tom Zhou",
   "name": "wspp",
   "description": "Lightly modified version of einaros/ws to support peer or p2p streaming for node.js",
-  "version": "0.4.27",
+  "version": "0.4.28",
   "repository": {
     "type": "git",
     "url": "git://github.com/InstantWebP2P/wspp.git"
@@ -14,20 +14,28 @@
   "keywords": [
     "peer",
     "p2p",
-    "datachannel"
+    "datachannel",
+    "Hixie",
+    "HyBi",
+    "Push",
+    "RFC-6455",
+    "WebSocket",
+    "WebSockets",
+    "real-time"
   ],
   "engines": {
     "node": ">=0.6.0"
   },
   "dependencies": {
     "commander": "~0.6.1",
+    "nan": "~0.3.0",
     "tinycolor": "0.x",
     "options": ">=0.0.5"
   },
   "devDependencies": {
-    "mocha": "~1.2.1",
-    "should": "0.6.x",
-    "expect.js": "0.1.x",
+    "mocha": "1.12.0",
+    "should": "1.2.x",
+    "expect.js": "0.2.x",
     "benchmark": "0.3.x",
     "ansi": "latest"
   },
