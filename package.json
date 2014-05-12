@@ -28,8 +28,8 @@
     "node": ">=0.6.0"
   },
   "dependencies": {
-    "commander": "~0.6.1",
-    "nan": "~0.6.0",
+    "commander": "~2.1.0",
+    "nan": "~1.0.0",
     "tinycolor": "0.x",
     "options": ">=0.0.5"
   },
