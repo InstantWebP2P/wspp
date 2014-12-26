@@ -1,4 +1,5 @@
-var Sender = require('../lib/Sender');
+var Sender = require('../lib/Sender')
+  , PerMessageDeflate = require('../lib/PerMessageDeflate');
 require('should');
 
 describe('Sender', function() {
@@ -19,6 +20,56 @@ describe('Sender', function() {
       var text = 'hi there';
       sender.frameAndSend(1, text, true, true);
       text.should.eql('hi there');
+    });
+
+    it('sets rsv1 flag if compressed', function(done) {
+      var sender = new Sender({
+        write: function(data) {
+          (data[0] & 0x40).should.equal(0x40);
+          done();
+        }
+      });
+      sender.frameAndSend(1, 'hi', true, false, true);
+    });
+  });
+
+  describe('#send', function() {
+    it('compresses data if compress option is enabled', function(done) {
+      var perMessageDeflate = new PerMessageDeflate();
+      perMessageDeflate.accept([{}]);
+
+      var sender = new Sender({
+        write: function(data) {
+          (data[0] & 0x40).should.equal(0x40);
+          done();
+        }
+      }, {
+        'permessage-deflate': perMessageDeflate
+      });
+      sender.send('hi', { compress: true });
+    });
+  });
+
+  describe('#close', function() {
+    it('should consume all data before closing', function(done) {
+      var perMessageDeflate = new PerMessageDeflate();
+      perMessageDeflate.accept([{}]);
+
+      var count = 0;
+      var sender = new Sender({
+        write: function(data) {
+          count++;
+        }
+      }, {
+        'permessage-deflate': perMessageDeflate
+      });
+      sender.send('foo', {compress: true});
+      sender.send('bar', {compress: true});
+      sender.send('baz', {compress: true});
+      sender.close(1000, null, false, function(err) {
+        count.should.be.equal(4);
+        done(err);
+      });
     });
   });
 });

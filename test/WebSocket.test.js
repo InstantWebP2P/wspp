@@ -70,7 +70,7 @@ describe('WebSocket', function() {
   describe('properties', function() {
     it('#bytesReceived exposes number of bytes received', function(done) {
       var wss = new WebSocketServer({port: ++port}, function() {
-        var ws = new WebSocket('ws://localhost:' + port);
+        var ws = new WebSocket('ws://localhost:' + port, { perMessageDeflate: false });
         ws.on('message', function() {
           ws.bytesReceived.should.eql(8);
           wss.close();
@@ -139,7 +139,7 @@ describe('WebSocket', function() {
 
       it('stress kernel write buffer', function(done) {
         var wss = new WebSocketServer({port: ++port}, function() {
-          var ws = new WebSocket('ws://localhost:' + port);
+          var ws = new WebSocket('ws://localhost:' + port, { perMessageDeflate: false });
         });
         wss.on('connection', function(ws) {
           while (true) {
@@ -1770,4 +1770,175 @@ describe('WebSocket', function() {
     });
   });
 
+  describe('permessage-deflate', function() {
+    it('is enabled by default', function(done) {
+      var srv = http.createServer(function (req, res) {});
+      var wss = new WebSocketServer({server: srv, perMessageDeflate: true});
+      srv.listen(++port, function() {
+        var ws = new WebSocket('ws://localhost:' + port);
+        srv.on('upgrade', function(req, socket, head) {
+          assert.ok(~req.headers['sec-websocket-extensions'].indexOf('permessage-deflate'));
+        });
+        ws.on('open', function() {
+          assert.ok(ws.extensions['permessage-deflate']);
+          ws.terminate();
+          wss.close();
+          done();
+        });
+      });
+    });
+
+    it('can be disabled', function(done) {
+      var srv = http.createServer(function (req, res) {});
+      var wss = new WebSocketServer({server: srv, perMessageDeflate: true});
+      srv.listen(++port, function() {
+        var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: false});
+        srv.on('upgrade', function(req, socket, head) {
+          assert.ok(!req.headers['sec-websocket-extensions']);
+          ws.terminate();
+          wss.close();
+          done();
+        });
+      });
+    });
+
+    it('can send extension parameters', function(done) {
+      var srv = http.createServer(function (req, res) {});
+      var wss = new WebSocketServer({server: srv, perMessageDeflate: true});
+      srv.listen(++port, function() {
+        var ws = new WebSocket('ws://localhost:' + port, {
+          perMessageDeflate: {
+            serverNoContextTakeover: true,
+            clientNoContextTakeover: true,
+            serverMaxWindowBits: 10,
+            clientMaxWindowBits: true
+          }
+        });
+        srv.on('upgrade', function(req, socket, head) {
+          var extensions = req.headers['sec-websocket-extensions'];
+          assert.ok(~extensions.indexOf('permessage-deflate'));
+          assert.ok(~extensions.indexOf('server_no_context_takeover'));
+          assert.ok(~extensions.indexOf('client_no_context_takeover'));
+          assert.ok(~extensions.indexOf('server_max_window_bits=10'));
+          assert.ok(~extensions.indexOf('client_max_window_bits'));
+          ws.terminate();
+          wss.close();
+          done();
+        });
+      });
+    });
+
+    it('can send and receive text data', function(done) {
+      var wss = new WebSocketServer({port: ++port, perMessageDeflate: true}, function() {
+        var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: true});
+        ws.on('open', function() {
+          ws.send('hi', {compress: true});
+        });
+        ws.on('message', function(message, flags) {
+          assert.equal('hi', message);
+          ws.terminate();
+          wss.close();
+          done();
+        });
+      });
+      wss.on('connection', function(ws) {
+        ws.on('message', function(message, flags) {
+          ws.send(message, {compress: true});
+        });
+      });
+    });
+
+    it('with binary stream will send fragmented data', function(done) {
+      var wss = new WebSocketServer({port: ++port, perMessageDeflate: true}, function() {
+        var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: true});
+        var callbackFired = false;
+        ws.on('open', function() {
+          var fileStream = fs.createReadStream('test/fixtures/textfile');
+          fileStream.bufferSize = 100;
+          ws.send(fileStream, {binary: true, compress: true}, function(error) {
+            assert.equal(null, error);
+            callbackFired = true;
+          });
+        });
+        ws.on('close', function() {
+          assert.ok(callbackFired);
+          wss.close();
+          done();
+        });
+      });
+      wss.on('connection', function(ws) {
+        ws.on('message', function(data, flags) {
+          assert.ok(flags.binary);
+          assert.ok(areArraysEqual(fs.readFileSync('test/fixtures/textfile'), data));
+          ws.terminate();
+        });
+      });
+    });
+
+    describe('#close', function() {
+      it('should not raise error callback, if any, if called during send data', function(done) {
+        var wss = new WebSocketServer({port: ++port, perMessageDeflate: true}, function() {
+          var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: true});
+          var errorGiven = false;
+          ws.on('open', function() {
+            ws.send('hi', function(error) {
+              errorGiven = error != null;
+            });
+            ws.close();
+          });
+          ws.on('close', function() {
+            setTimeout(function() {
+              assert.ok(!errorGiven);
+              wss.close();
+              ws.terminate();
+              done();
+            }, 1000);
+          });
+        });
+      });
+    });
+
+    describe('#terminate', function() {
+      it('will raise error callback, if any, if called during send data', function(done) {
+        var wss = new WebSocketServer({port: ++port, perMessageDeflate: true}, function() {
+          var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: true});
+          var errorGiven = false;
+          ws.on('open', function() {
+            ws.send('hi', function(error) {
+              errorGiven = error != null;
+            });
+            ws.terminate();
+          });
+          ws.on('close', function() {
+            setTimeout(function() {
+              assert.ok(errorGiven);
+              wss.close();
+              ws.terminate();
+              done();
+            }, 1000);
+          });
+        });
+      });
+
+      it('can call during receiving data', function(done) {
+        var wss = new WebSocketServer({port: ++port, perMessageDeflate: true}, function() {
+          var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: true});
+          wss.on('connection', function(client) {
+            for (var i = 0; i < 10; i++) {
+              client.send('hi');
+            }
+            client.send('hi', function() {
+              ws.terminate();
+            });
+          });
+          ws.on('close', function() {
+            setTimeout(function() {
+              wss.close();
+              done();
+            }, 1000);
+          });
+        });
+      });
+    });
+  });
 });
