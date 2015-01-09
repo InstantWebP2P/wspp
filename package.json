@@ -27,7 +27,8 @@
   "dependencies": {
     "nan": "1.4.x",
     "options": ">=0.0.5",
-    "ultron": "1.0.x"
+    "ultron": "1.0.x",
+    "readable-stream": "1.0.33"
   },
   "devDependencies": {
     "ansi": "0.3.x",
