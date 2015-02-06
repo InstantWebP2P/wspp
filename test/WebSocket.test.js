@@ -1425,6 +1425,28 @@ describe('WebSocket', function() {
         });
       });
     });
+
+    it('consumes all data when the server socket closed', function(done) {
+      var wss = new WebSocketServer({port: ++port}, function() {
+        wss.on('connection', function(conn) {
+          conn.send('foo');
+          conn.send('bar');
+          conn.send('baz');
+          conn.close();
+        });
+        var ws = new WebSocket('ws://localhost:' + port);
+        var messages = [];
+        ws.on('message', function (message) {
+          messages.push(message);
+          if (messages.length === 3) {
+            assert.deepEqual(messages, ['foo', 'bar', 'baz']);
+            wss.close();
+            ws.terminate();
+            done();
+          }
+        });
+      });
+    });
   });
 
   describe('W3C API emulation', function() {
@@ -1871,6 +1893,28 @@ describe('WebSocket', function() {
           assert.ok(flags.binary);
           assert.ok(areArraysEqual(fs.readFileSync('test/fixtures/textfile'), data));
           ws.terminate();
+        });
+      });
+    });
+
+    describe('#send', function() {
+      it('can set the compress option true when perMessageDeflate is disabled', function(done) {
+        var wss = new WebSocketServer({port: ++port}, function() {
+          var ws = new WebSocket('ws://localhost:' + port, {perMessageDeflate: false});
+          ws.on('open', function() {
+            ws.send('hi', {compress: true});
+          });
+          ws.on('message', function(message, flags) {
+            assert.equal('hi', message);
+            ws.terminate();
+            wss.close();
+            done();
+          });
+        });
+        wss.on('connection', function(ws) {
+          ws.on('message', function(message, flags) {
+            ws.send(message, {compress: true});
+          });
         });
       });
     });
