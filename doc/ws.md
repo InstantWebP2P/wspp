@@ -16,6 +16,7 @@ This class is a WebSocket server. It is an `EventEmitter`.
   * `noServer` Boolean
   * `disableHixie` Boolean
   * `clientTracking` Boolean
+  * `perMessageDeflate` Boolean|Object
 * `callback` Function
 
 Construct a new server object.
@@ -30,7 +31,7 @@ Either `port` or `server` must be provided, otherwise you might enable
 * `info` Object:
   * `origin` String: The value in the Origin header indicated by the client.
   * `req` http.ClientRequest: The client HTTP GET request.
-  * `secure` Boolean: `true` if `req.connection.authorized` or `req.connection.encypted` is set.
+  * `secure` Boolean: `true` if `req.connection.authorized` or `req.connection.encrypted` is set.
 * `cb` Function: A callback that must be called by the user upon inspection of the `info` fields. Arguments in this callback are:
   * `result` Boolean: Whether the user accepts or not the handshake.
   * `code` Number: If `result` is `false` this field determines the HTTP error status code to be sent to the client.
@@ -52,6 +53,18 @@ If `verifyClient` is not set then the handshake is automatically accepted.
   * `protocol` String: If `result` is `true` then this field sets the value of the Sec-WebSocket-Protocol header in the HTTP 101 response.
 
 If `handleProtocols` is not set then the handshake is accepted regardless the value of Sec-WebSocket-Protocol header. If it is set but the user does not invoke the `cb` callback then the handshake is rejected with error HTTP 501.
+
+### options.perMessageDeflate
+
+`perMessageDeflate` can be used to control the behavior of [permessage-deflate extension](https://tools.ietf.org/html/draft-ietf-hybi-permessage-compression-19). The extension is disabled when `false`. Defaults to `true`. If an object is provided then that is extension parameters:
+
+* `serverNoContextTakeover` Boolean: Whether to use context take over or not.
+* `clientNoContextTakeover` Boolean: The value to be requested to clients whether to use context take over or not.
+* `serverMaxWindowBits` Number: The value of windowBits.
+* `clientMaxWindowBits` Number: The value of max windowBits to be requested to clients.
+* `memLevel` Number: The value of memLevel.
+
+If a property is empty then either an offered configuration or a default value is used.
 
 ### server.close()
 
@@ -86,9 +99,10 @@ When a new WebSocket connection is established. `socket` is an object of type `w
 
 This class represents a WebSocket connection. It is an `EventEmitter`.
 
-### new ws.WebSocket(address, [options])
+### new ws.WebSocket(address, [protocols], [options])
 
-* `address` String|Array
+* `address` String
+* `protocols` String|Array
 * `options` Object
   * `protocol` String
   * `agent` Agent
@@ -104,8 +118,13 @@ This class represents a WebSocket connection. It is an `EventEmitter`.
   * `ca` Array
   * `ciphers` String
   * `rejectUnauthorized` Boolean
+  * `perMessageDeflate` Boolean|Object
 
 Instantiating with an `address` creates a new WebSocket client object. If `address` is an Array (request, socket, rest), it is instantiated as a Server client (e.g. called from the `ws.Server`).
+
+### options.perMessageDeflate
+
+Parameters of permessage-deflate extension which have the same form with the one for `ws.Server` except the direction of requests. (e.g. `serverNoContextTakeover` is the value to be requested to the server)
 
 ### websocket.bytesReceived
 
