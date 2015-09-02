@@ -26,6 +26,16 @@ function areArraysEqual(x, y) {
 
 describe('WebSocketServer', function() {
   describe('#ctor', function() {
+    it('throws TypeError when called without new', function(done) {
+      try {
+        var ws = WebSocketServer({noServer: true});
+      }
+      catch (e) {
+        e.should.be.instanceof(TypeError);
+        done();
+      }
+    });
+
     it('throws an error if no option object is passed', function() {
       var gotException = false;
       try {
@@ -88,6 +98,22 @@ describe('WebSocketServer', function() {
           wss.close();
           srv.close();
           done();
+        });
+      });
+    });
+
+    it('426s for non-Upgrade requests', function (done) {
+      var wss = new WebSocketServer({ port: ++port }, function () {
+        http.get('http://localhost:' + port, function (res) {
+          var body = '';
+
+          res.statusCode.should.equal(426);
+          res.on('data', function (chunk) { body += chunk; });
+          res.on('end', function () {
+            body.should.equal(http.STATUS_CODES[426]);
+            wss.close();
+            done();
+          });
         });
       });
     });

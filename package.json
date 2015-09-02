@@ -2,7 +2,7 @@
   "author": "Tom Zhou",
   "name": "wspp",
   "description": "Lightly modified version of einaros/ws to support peer or p2p streaming for node.js",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,8 +30,8 @@
     "readable-stream": "1.0.33"
   },
   "optionalDependencies": {
-    "bufferutil": "1.1.x",
-    "utf-8-validate": "1.1.x"
+    "bufferutil": "1.2.x",
+    "utf-8-validate": "1.2.x"
   },
   "devDependencies": {
     "ansi": "0.3.x",
