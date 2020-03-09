@@ -40,14 +40,45 @@ describe('WebSocket', function() {
         done();
       }
     });
-    it('throws TypeError when called without new', function(done) {
-      try {
-        var ws = WebSocket('ws://localhost:' + port);
-      }
-      catch (e) {
-        e.should.be.instanceof(TypeError);
-        done();
-      }
+
+    it('should return a new instance if called without new', function(done) {
+      var ws = WebSocket('ws://localhost:' + port);
+      ws.should.be.an.instanceOf(WebSocket);
+      done();
+    });
+
+    it('should emit an error object when the receiver throws an error string', function(done) {
+    
+      var wss = new WebSocketServer({port: ++port}, function() {
+
+          var ws = new WebSocket('ws://localhost:' + port);
+          
+          ws.on('open', function () {
+            ws._receiver.error('This is an error string', 1002);
+          });
+
+          ws.on('error', function (error) {
+            error.should.be.an.instanceof(Error);
+            done();
+          });
+      });
+    });
+
+    it('should emit an error object when the receiver throws an error object', function(done) {
+    
+      var wss = new WebSocketServer({port: ++port}, function() {
+
+          var ws = new WebSocket('ws://localhost:' + port);
+          
+          ws.on('open', function () {
+            ws._receiver.error(new Error('This is an error object'), 1002);
+          });
+
+          ws.on('error', function (error) {
+            error.should.be.an.instanceof(Error);
+            done();
+          });
+      });
     });
   });
 
@@ -401,11 +432,13 @@ describe('WebSocket', function() {
         ws.on('open', function() {
           assert.fail('connect shouldnt be raised here');
         });
-        ws.on('close', function() {
-          assert.fail('close shouldnt be raised here');
-        });
+		var errorCallBackFired = false;
         ws.on('error', function() {
+          errorCallBackFired = true;
+        });
+        ws.on('close', function() {
           setTimeout(function() {
+			assert.equal(true, errorCallBackFired);
             assert.equal(ws.readyState, WebSocket.CLOSED);
             done();
           }, 50)
@@ -581,6 +614,23 @@ describe('WebSocket', function() {
         });
         srv.on('ping', function(message) {
           assert.equal('hi', message);
+          srv.close();
+          ws.terminate();
+          done();
+        });
+      });
+    });
+
+    it('can send safely receive numbers as ping payload', function(done) {
+      server.createServer(++port, function(srv) {
+        var ws = new WebSocket('ws://localhost:' + port);
+
+        ws.on('open', function() {
+          ws.ping(200);
+        });
+
+        srv.on('ping', function(message) {
+          assert.equal('200', message);
           srv.close();
           ws.terminate();
           done();
@@ -1530,6 +1580,10 @@ describe('WebSocket', function() {
         ws.onclose = listener;
         ws.onopen = listener;
 
+        assert.ok(ws.binaryType === 'nodebuffer');
+        ws.binaryType = 'arraybuffer';
+        assert.ok(ws.binaryType === 'arraybuffer');
+
         assert.ok(ws.onopen === listener);
         assert.ok(ws.onmessage === listener);
         assert.ok(ws.onclose === listener);
@@ -1680,6 +1734,63 @@ describe('WebSocket', function() {
         client.send('hi')
       });
     });
+
+    it('should pass binary data as a node.js Buffer by default', function(done) {
+      server.createServer(++port, function(srv) {
+        var ws = new WebSocket('ws://localhost:' + port);
+        var array = new Uint8Array(4096);
+
+        ws.onopen = function() {
+          ws.send(array, {binary: true});
+        };
+        ws.onmessage = function(messageEvent) {
+          assert.ok(messageEvent.binary);
+          assert.ok(ws.binaryType === 'nodebuffer');
+          assert.ok(messageEvent.data instanceof Buffer);
+          ws.terminate();
+          srv.close();
+          done();
+        };
+      });
+    });
+
+    it('should pass an ArrayBuffer for event.data if binaryType = arraybuffer', function(done) {
+      server.createServer(++port, function(srv) {
+        var ws = new WebSocket('ws://localhost:' + port);
+        ws.binaryType = 'arraybuffer';
+        var array = new Uint8Array(4096);
+
+        ws.onopen = function() {
+          ws.send(array, {binary: true});
+        };
+        ws.onmessage = function(messageEvent) {
+          assert.ok(messageEvent.binary);
+          assert.ok(messageEvent.data instanceof ArrayBuffer);
+          ws.terminate();
+          srv.close();
+          done();
+        };
+      });
+    });
+
+    it('should ignore binaryType for text messages', function(done) {
+      server.createServer(++port, function(srv) {
+        var ws = new WebSocket('ws://localhost:' + port);
+        ws.binaryType = 'arraybuffer';
+
+        ws.onopen = function() {
+          ws.send('foobar');
+        };
+        ws.onmessage = function(messageEvent) {
+          assert.ok(!messageEvent.binary);
+          assert.ok(typeof messageEvent.data === 'string');
+          ws.terminate();
+          srv.close();
+          done();
+        };
+      });
+    });
+
   });
 
   describe('ssl', function() {
