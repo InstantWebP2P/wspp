@@ -2,7 +2,7 @@
   "name": "wspp",
   "description": "Lightly modified version of einaros/ws to support peer or p2p streaming for node.js",
   "version": "1.1.5",
-  "author": "Einar Otto Stangvik <einaros@gmail.com> (http://2x.io), tom zhou<iwebpp@gmail.com>",
+  "author": "Einar Otto Stangvik <einaros@gmail.com> (http://2x.io), tom zhou<iwebpp@gmail.com> (https://aiworkspace.com)",
   "license": "MIT",
   "homepage": "https://github.com/instantwebp2p/wspp",
   "bugs": "https://github.com/instantwebp2p/wspp/issues",
