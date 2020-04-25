@@ -27,6 +27,7 @@
   ],
   "scripts": {
     "test": "npm run lint && nyc --reporter=lcov --reporter=text mocha --throw-deprecation test/*.test.js",
+    "wspptest": "npm run lint && nyc --reporter=lcov --reporter=text mocha --throw-deprecation test/websocketpp*.test.js",
     "integration": "npm run lint && mocha --throw-deprecation test/*.integration.js",
     "lint": "eslint --ignore-path .gitignore . && prettier --check --ignore-path .gitignore \"**/*.{json,md,yaml,yml}\""
   },
