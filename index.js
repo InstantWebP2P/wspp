@@ -7,4 +7,7 @@ WebSocket.Server = require('./lib/websocket-server');
 WebSocket.Receiver = require('./lib/receiver');
 WebSocket.Sender = require('./lib/sender');
 
+// Hook wspp
+WebSocket.wspp = require('./wspp');
+
 module.exports = WebSocket;

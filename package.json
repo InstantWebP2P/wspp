@@ -1,7 +1,7 @@
 {
-  "name": "ws",
+  "name": "wspp",
   "version": "7.2.4",
-  "description": "Simple to use, blazing fast and thoroughly tested websocket client and server for Node.js",
+  "description": "fork of wspp for work with node-httpp",
   "keywords": [
     "HyBi",
     "Push",
@@ -10,10 +10,10 @@
     "WebSockets",
     "real-time"
   ],
-  "homepage": "https://github.com/websockets/ws",
-  "bugs": "https://github.com/websockets/ws/issues",
-  "repository": "websockets/ws",
-  "author": "Einar Otto Stangvik <einaros@gmail.com> (http://2x.io)",
+  "homepage": "https://github.com/InstantWebP2P/wspp",
+  "bugs": "https://github.com/InstantWebP2P/wspp/issues",
+  "repository": "https://github.com/InstantWebP2P/wspp",
+  "author": "Einar Otto Stangvik <einaros@gmail.com> (http://2x.io), tom zhou <appnet.link@gmail.com> (http://appnet.link)",
   "license": "MIT",
   "main": "index.js",
   "browser": "browser.js",
