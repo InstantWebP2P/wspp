@@ -1,6 +1,6 @@
 {
   "name": "wspp",
-  "version": "7.2.6",
+  "version": "7.2.7",
   "description": "fork of wspp for work with node-httpp",
   "keywords": [
     "HyBi",
@@ -23,6 +23,7 @@
   "files": [
     "browser.js",
     "index.js",
+    "wspp.js",
     "lib/*.js"
   ],
   "scripts": {
