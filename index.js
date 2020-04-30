@@ -8,6 +8,6 @@ WebSocket.Receiver = require('./lib/receiver');
 WebSocket.Sender = require('./lib/sender');
 
 // Hook wspp
-WebSocket.wspp = require('./wspp');
+WebSocket.wspp = require('./httpp');
 
 module.exports = WebSocket;

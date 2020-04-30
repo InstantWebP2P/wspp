@@ -1,6 +1,6 @@
 {
   "name": "wspp",
-  "version": "7.2.4",
+  "version": "httpp.7.2.4",
   "description": "fork of wspp for work with node-httpp",
   "keywords": [
     "HyBi",
