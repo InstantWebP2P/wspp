@@ -1,3 +1,7 @@
+WSPP - Fork of WS for Working with NodeJs-Httpp
+===============================================
+
+
 # ws: a Node.js WebSocket library
 
 [![Version npm](https://img.shields.io/npm/v/ws.svg?logo=npm)](https://www.npmjs.com/package/ws)
