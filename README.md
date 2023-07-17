@@ -1,4 +1,4 @@
-WSPP - Fork of WS for Working with NodeJs-Httpp
+WSPP - Fork of WS for Working with [NodeJS-HTTPP](https://github.com/InstantWebP2P/nodejs-httpp)
 ===============================================
 
 
